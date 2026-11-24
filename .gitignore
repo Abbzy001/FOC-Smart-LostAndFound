@@ -1,0 +1,8 @@
+.env
+/vendor/
+/var/
+/public/uploads/*
+!/public/uploads/.gitkeep
+.idea/
+.vscode/
+Thumbs.db
