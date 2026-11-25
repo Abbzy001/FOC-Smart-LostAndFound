@@ -14,3 +14,5 @@ COPY . /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
+
+CMD ["sh", "-c", "a2dismod mpm_event mpm_worker && a2enmod mpm_prefork rewrite && exec apache2-foreground"]
