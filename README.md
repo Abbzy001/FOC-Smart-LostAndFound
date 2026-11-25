@@ -44,6 +44,28 @@ The Docker app is available at [http://localhost:8081](http://localhost:8081) by
 
 The `.env` file is ignored by Git. Never use development database credentials outside a local environment.
 
+## Deploying to Railway
+
+Railway builds the root `Dockerfile`; `compose.yaml` is for local development and does not create Railway's database service. Add a Railway MySQL service, then add reference variables to the PHP service using your database service's actual Railway service name:
+
+```text
+DB_HOST=${{MySQL.MYSQLHOST}}
+DB_PORT=${{MySQL.MYSQLPORT}}
+DB_DATABASE=${{MySQL.MYSQLDATABASE}}
+DB_USERNAME=${{MySQL.MYSQLUSER}}
+DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
+```
+
+Replace `MySQL` with the exact Railway service name if it differs. The application also accepts the `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`, `MYSQLUSER`, and `MYSQLPASSWORD` environment variables directly.
+
+After the MySQL service is ready and its variables are available to the web service, run the schema migrations once from the deployed application environment:
+
+```sh
+php scripts/migrate.php
+```
+
+The service must listen on the port Railway routes to it. This image runs Apache on port `80` (`EXPOSE 80`); configure Railway's service target port as `80` if automatic port detection does not select it. Deploy the Dockerfile change to resolve Apache's multiple-MPM startup error, then check the deployment logs and `/health` endpoint.
+
 ## Tests
 
 Run the matching-engine unit checks with XAMPP's PHP:

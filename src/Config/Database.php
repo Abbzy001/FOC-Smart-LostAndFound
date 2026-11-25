@@ -17,11 +17,11 @@ final class Database
             return self::$connection;
         }
 
-        $host = self::requiredEnvironmentValue('DB_HOST');
-        $port = self::requiredEnvironmentValue('DB_PORT');
-        $database = self::requiredEnvironmentValue('DB_DATABASE');
-        $username = self::requiredEnvironmentValue('DB_USERNAME');
-        $password = getenv('DB_PASSWORD');
+        $host = self::requiredEnvironmentValue('DB_HOST', 'MYSQLHOST');
+        $port = self::requiredEnvironmentValue('DB_PORT', 'MYSQLPORT');
+        $database = self::requiredEnvironmentValue('DB_DATABASE', 'MYSQLDATABASE');
+        $username = self::requiredEnvironmentValue('DB_USERNAME', 'MYSQLUSER');
+        $password = self::environmentValue('DB_PASSWORD', 'MYSQLPASSWORD');
         if ($password === false) {
             $password = '';
         }
@@ -40,12 +40,22 @@ final class Database
         return self::$connection;
     }
 
-    private static function requiredEnvironmentValue(string $name): string
+    private static function requiredEnvironmentValue(string $name, ?string $fallback = null): string
     {
-        $value = getenv($name);
+        $value = self::environmentValue($name, $fallback);
 
         if ($value === false || $value === '') {
             throw new RuntimeException("Required environment variable {$name} is not set.");
+        }
+
+        return $value;
+    }
+
+    private static function environmentValue(string $name, ?string $fallback = null): string|false
+    {
+        $value = getenv($name);
+        if ($value === false && $fallback !== null) {
+            $value = getenv($fallback);
         }
 
         return $value;
